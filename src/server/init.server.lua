@@ -2,29 +2,38 @@
 
 local Line2D = require(script.Line2D)
 local Ray2D = require(script.Ray2D)
-
-local P11 = workspace:FindFirstChild("P11")
-local P12 = workspace:FindFirstChild("P12")
-local P21 = workspace:FindFirstChild("P21")
-local P22 = workspace:FindFirstChild("P22")
-local I = workspace:FindFirstChild("I")
+local Grid = require(script.Grid)
 
 --// INSTRUCTIONS //--
 
+local mainGrid = Grid.new(Vector2.new(-25, -25), Vector2.new(25, 25))
+
+local rays = {}
+for counter = 1, 100 do
+	local part = Instance.new("Part")
+	part.Size = Vector3.new(1, 1, 1)
+	part.Anchored = true
+	part.Parent = workspace
+
+	table.insert(rays, {
+		Ray2D = Ray2D.new(
+			Vector2.new(math.random(-10, 10), math.random(-10, 10)),
+			Vector2.new(math.random(-1, 1), math.random(-1, 1)).Unit
+		),
+		Part = part,
+	})
+end
+
 while wait() do
-	local p11 = Vector2.new(P11.Position.X, P11.Position.Z)
-	local p12 = Vector2.new(P12.Position.X, P12.Position.Z)
-	local p21 = Vector2.new(P21.Position.X, P21.Position.Z)
-	local p22 = Vector2.new(P22.Position.X, P22.Position.Z)
+	local lines = { mainGrid.Right, mainGrid.Top, mainGrid.Left, mainGrid.Bottom }
 
-	local ray = Ray2D.new(p11, (p12 - p11).Unit)
-	local line = Line2D.new(p21, p22)
-	local intersection = ray:Travel((p11 - p12).Magnitude, { line })
-
-	if intersection then
-		intersection = intersection.Point
-		I.Position = Vector3.new(intersection.X, 1, intersection.Y)
-	else
-		I.Position = Vector3.new(0, 0, 0)
+	for _, ray in pairs(rays) do
+		local intersection = ray.Ray2D:Travel(0.5, lines)
+		if not intersection then
+			ray.Ray2D.Origin = ray.Ray2D.Origin + ray.Ray2D.Direction * 0.5
+		else
+			ray.Ray2D.Origin = intersection.Position
+		end
+		ray.Part.Position = Vector3.new(ray.Ray2D.Origin.X, 1, ray.Ray2D.Origin.Y)
 	end
 end

@@ -30,10 +30,13 @@ function Ray2D:Travel(distance, lines)
 	local intersections = {}
 
 	for _, line in pairs(lines) do
-		local intersectionPoint = rayLine:Intersect(line)
-		if intersectionPoint then
-			local intersectionMagnitude = (self.Origin - intersectionPoint).Magnitude
-			table.insert(intersections, { Line = line, Point = intersectionPoint, Magnitude = intersectionMagnitude })
+		local intersectionPosition = rayLine:Intersect(line)
+		if intersectionPosition then
+			local intersectionMagnitude = (self.Origin - intersectionPosition).Magnitude
+			table.insert(
+				intersections,
+				{ Line = line, Position = intersectionPosition, Magnitude = intersectionMagnitude }
+			)
 		end
 	end
 
